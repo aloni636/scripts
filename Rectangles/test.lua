@@ -2,7 +2,6 @@ local rect = require("counter")
 local shapes = require("shapes")
 local lu = require("luaunit")
 
--- local profile = require("jit.profile")
 --------------- TESTS ---------------
 
 function test_count()

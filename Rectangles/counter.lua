@@ -40,7 +40,7 @@
 ---@param s       string
 ---@param pattern string
 ---@return fun():number, number, string
-function igmatch(s, pattern)
+local function igmatch(s, pattern)
 	-- start, end of match
 	local st, en = 0, 0
 	return function()
@@ -53,7 +53,7 @@ function igmatch(s, pattern)
 	end
 end
 
-function scanline_iter(shape)
+local function scanline_iter(shape)
 	-- make sure last char is \n
 	-- this allows scanlines to be defined as all char up until \n
 	if string.sub(shape, -1) ~= "\n" then
@@ -65,7 +65,7 @@ end
 -- scanline stats return 2 objects:
 -- A. set indicating where the scanline connects to previous line
 -- B. all edges of scanline, with weight of 1
-function scanline_stats(scanline)
+local function scanline_stats(scanline)
 	local conn = {}
 	local edges = {}
 
@@ -97,7 +97,7 @@ function scanline_stats(scanline)
 	return conn, edges
 end
 
-function count(shape)
+local function count(shape)
 	local weighted_edges = {}
 	local counter = 0
 	for scanline in scanline_iter(shape) do
