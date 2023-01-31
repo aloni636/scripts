@@ -24,7 +24,10 @@ h. echo 'a+42//5-c pressure*3+42/5-14256' | gawk 'BEGIN {v="(42//5|42/5)"}{gsub 
 * simulate the non greedy `\(.*?\)` by replacing the `.> with *all chars but* `\)>  credit: https://unix.stackexchange.com/a/49605
 k. echo 'a/b(division) + c%d() - (a#(b)2(' | gawk 'gsub (/\([^\)]*\)/, "", $0)'
    echo 'a/b(division) + c%d() - (a#(b)2(' | gawk 'gsub (/\([^\)\(]*\)/, "", $0)'
-
-
-
-
+m. wget https://www.gutenberg.org/files/345/345-0.txt -O dracula.tx
+   cat dracula.txt | awk '{if (tolower($0) ~ /professor/ && $0 ~ /(quip|this)/) print $0}'
+n. echo 'lion,ant,road,neon' | awk 'BEGIN {FS=","; OFS=FS} {$3 = "42"} {print $0}
+   echo '_;3%,.,=-=,:' | awk 'BEGIN {FS=","; OFS=FS} {$3 = "42"} {print $0}'
+o. printf 'so and so also sow and soup' | awk '{ if (match ($0, /(so[^so]*){4}$/)!=0) print substr($0, 0, RSTART-1) "X" substr($0, RSTART+2, RSTART+RLENGTH)}'
+   printf 'sososososososo\nso and so\n' | awk '{ if (match ($0, /(so[^so]*){4}$/)!=0) print substr($0, 0, RSTART-1) "X" substr($0, RSTART+2, RSTART+RLENGTH)}'
+p.
