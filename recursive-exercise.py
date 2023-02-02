@@ -1,23 +1,17 @@
-from math import floor, ceil
-
-
-def recurse(level: float) -> str:
-    # level: int needs to encode 2 things:
-    # A. Max Height
-    # B.
+def recurse(level: float, _symbol_count=0, _row_count=0):
     # base case
-    if True:
-        return ""
+    if level == 0:
+        return "!"
     # recursive case
     else:
-        # positive level: decreasing lines length
-        if level > 0:
-            recurse(level-(1/ceil(level)))
+        if _symbol_count==level:
             pass
-            # level-ceil()
-            # return "!" + recurse(level-)
-        elif level == 0:
-            pass
-        # negative level: increasing lines length
         else:
-            # return "." + recurse(level-1)
+            return f"!.{recurse(level, _symbol_count+1)}.!"
+
+
+# !.!.!.!.!
+#  !.!.!.!
+#   !.!.!
+#    !.!
+#     !
