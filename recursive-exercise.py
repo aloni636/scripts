@@ -1,6 +1,18 @@
+# Goal: draw hourglass by using recursion only
+# The string is constructed from outside to inside, simultaneously adding characters to the start and end of the string
+# Each function call is wrapping the next callee with predefined characters
+#
+# Definitions:
+# "symbols" = predefined characters
+# "levels" = amount of rows the user asked for
+#
+# Each function keeps track of 3 things:
+# A. The amount of desired levels
+# A. The amount of symbols already inserted to current row
+# A. The current row
 def recurse(level: int, _symbol_count=0, _row_count=0):
     # base case
-    if level == _row_count+1 and (_symbol_count+1)==level:
+    if level == _row_count+1 and _symbol_count==level-1:
         return "!"
     # recursive case
     else:
