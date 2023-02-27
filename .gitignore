@@ -3,3 +3,4 @@
 .null-ls-root
 lua_modules
 tutorial.lua
+__*__

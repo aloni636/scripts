@@ -30,4 +30,17 @@ n. echo 'lion,ant,road,neon' | awk 'BEGIN {FS=","; OFS=FS} {$3 = "42"} {print $0
    echo '_;3%,.,=-=,:' | awk 'BEGIN {FS=","; OFS=FS} {$3 = "42"} {print $0}'
 o. printf 'so and so also sow and soup' | awk '{ if (match ($0, /(so[^so]*){4}$/)!=0) print substr($0, 0, RSTART-1) "X" substr($0, RSTART+2, RSTART+RLENGTH)}'
    printf 'sososososososo\nso and so\n' | awk '{ if (match ($0, /(so[^so]*){4}$/)!=0) print substr($0, 0, RSTART-1) "X" substr($0, RSTART+2, RSTART+RLENGTH)}'
-p.
+* a little cursed, but *technically* works with no sub/gsub calls
+p. words='tiger imp goat eagle ant important'
+   echo "$words" | awk 'BEGIN {RS=" "; ORS=" "} /^(imp|ant)$/ {$0=""} {print "("$1")"}'
+
+# Field separators
+* field seperator is "(" or ")":
+a. cat brackets.txt | awk -F '(\\(|\\))' '{print $2}'
+b. cat scores.csv | awk -F ',' '{print $1":"$3}'
+c. cat scores.csv | awk -F ',' '$2>70 && $1!="Name" {print $1}'
+d. echo 'hi there' | awk -F '\\w' '{print NF-1}'
+   echo 'u-no;co%."(do_12:as' | awk -F '\\w' '{print NF-1}'
+* print first & last double quotation marked words that are more then single letters:
+e. echo '1 "grape" and "mango" and "guava"' | awk -F '"' '{if (length($(NF-1))==1) {R=3} else {R=1}; print $2 " " $(NF-R)}'
+   echo '("a 1""b""c-2""d")' | awk -F '"' '{if (length($(NF-1))==1) {R=3} else {R=1}; print $2 " " $(NF-R)}'
