@@ -1,3 +1,7 @@
+# NOTE: Grid bounds are STATIC and do not participate in the simulation!
+# Think of it like Dirichlet boundary conditions.
+# 1 == Alive
+# 0 == Dead
 BEGIN {}
 
 {
