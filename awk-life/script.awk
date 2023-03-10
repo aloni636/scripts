@@ -2,7 +2,7 @@
 # Think of it like Dirichlet boundary conditions.
 # 1 == Alive
 # 0 == Dead
-BEGIN {}
+BEGIN {print("iter: " iter); print("speed: " speed)}
 
 {
   for (i=1;i<=NF;i++) grid[NR,i]=$i
@@ -28,12 +28,13 @@ BEGIN {}
            +grid[i+1,j-1] \
            +grid[i+1,j  ] \
            +grid[i+1,j+1] 
-        }
+        
         future_cell = 0
         current_cell = grid[i,j]
         if (neighbors==3 && current_cell==0) {future_cell=1}
         else if ((neighbors==2 || neighbors==3) && current_cell==1) {future_cell=1};
         dst_grid[i,j] = future_cell
+      }
       }
     }
     RED_COLOR = "\033[31m%s\033[0m "
@@ -47,7 +48,14 @@ BEGIN {}
       }
       printf ("\n") 
     }
-    printf("\n")
+    ANSI_TOP = "\033[" NR+1 "A"
+    ANSI_BOTTOM = "\033[" NR+1 "B"
+
+    print("Iteration: " T "/" iter)
+
+    printf(ANSI_TOP)
+    system("sleep " speed)
   }
+  printf(ANSI_BOTTOM)
 }
 
