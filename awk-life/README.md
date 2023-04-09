@@ -18,7 +18,7 @@ run `gawk -v iter=<int> -v speed=<float> -f script.awk <grid file>`
 Example in `./run.sh`
 
 # Screenshots
-
+![demo](./assets/demo.gif)
 
 
 # Enjoy!
