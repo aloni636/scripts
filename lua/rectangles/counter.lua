@@ -35,66 +35,68 @@
 ---    str = "hello world from Lua"
 ---    for s,e,w in string.gmatch(str, "%a+") do
 ---        print(w) -- prints each word
----  			print(string.sub(w,s,e)) -- also prints each word
+---        print(string.sub(w,s,e)) -- also prints each word
 ---    end
 ---@param s       string
 ---@param pattern string
 ---@return fun(): number, number, string
 local function igmatch(s, pattern)
-	-- start, end of match
-	local st, en = 0, 0
-	return function()
-		st, en = string.find(s, pattern, en + 1)
-		if st == nil then
-			return nil
-		else
-			return st, en, string.sub(s, st, en)
-		end
-	end
+  -- start, end of match
+  local st, en = 0, 0
+  return function()
+    st, en = string.find(s, pattern, en + 1)
+    if st == nil then
+      return nil
+    else
+      return st, en, string.sub(s, st, en)
+    end
+  end
 end
 
 local function scanline_iter(shape)
-	-- make sure last char is \n
-	-- this allows scanlines to be defined as all char up until \n
-	if string.sub(shape, -1) ~= "\n" then
-		shape = shape .. "\n"
-	end
-	return string.gmatch(shape, "(.-)\n")
+  -- make sure last char is \n
+  -- this allows scanlines to be defined as all char up until \n
+  if string.sub(shape, -1) ~= "\n" then
+    shape = shape .. "\n"
+  end
+  return string.gmatch(shape, "(.-)\n")
 end
 
--- scanline stats return 2 objects:
--- A. set indicating where the scanline connects to previous line
--- B. all edges of scanline, with weight of 1
+---scanline stats return 2 objects:
+---A. set indicating where the scanline connects to previous line
+---B. all edges of scanline, with weight of 1
+---@param scanline string
+---@return table connectivity_set, table scanline_edges
 local function scanline_stats(scanline)
-	local conn = {}
-	local edges = {}
+  local connectivity_set = {}
+  local scanline_edges = {}
 
-	-- match every connector i.e +,|
-	-- store it in a Set, where items are stored as indices
-	for index, _, _ in igmatch(scanline, "[%+%|]") do
-		conn[index] = true
-	end
+  -- match every connector i.e +,|
+  -- store it in a Set, where items are stored as indices
+  for index, _, _ in igmatch(scanline, "[%+%|]") do
+    connectivity_set[index] = true
+  end
 
-	-- iterate over edge strips
-	for strip_start, _, match in igmatch(scanline, "%+[%+%-]+") do
-		local previous_vertices = {}
-		-- iterate over each vertex
-		-- i starts from 1, i.e edge-strip local coords, instead of scanline coords
-		for vert, _ in igmatch(match, "%+") do
-			-- start creating edges after first vertex
-			if vert > 1 then
-				-- iterate over previous vertices
-				for _, prev_vert in pairs(previous_vertices) do
-					-- offset edges from strip local coords to scanline coords
-					local offset = strip_start - 1
-					table.insert(edges, { s = prev_vert + offset, e = vert + offset, w = 1 })
-				end
-			end
-			table.insert(previous_vertices, vert)
-		end
-	end
+  -- iterate over edge strips
+  for strip_start, _, match in igmatch(scanline, "%+[%+%-]+") do
+    local previous_vertices = {}
+    -- iterate over each vertex
+    -- i starts from 1, i.e edge-strip local coords, instead of scanline coords
+    for vert, _ in igmatch(match, "%+") do
+      -- start creating edges after first vertex
+      if vert > 1 then
+        -- iterate over previous vertices
+        for _, prev_vert in pairs(previous_vertices) do
+          -- offset edges from strip local coords to scanline coords
+          local offset = strip_start - 1
+          table.insert(scanline_edges, { s = prev_vert + offset, e = vert + offset, w = 1 })
+        end
+      end
+      table.insert(previous_vertices, vert)
+    end
+  end
 
-	return conn, edges
+  return connectivity_set, scanline_edges
 end
 
 ---Returns an iterator function that, each time it is called,
@@ -102,50 +104,50 @@ end
 ---@param shape string
 ---@return fun():  integer, table
 local function count(shape)
-	local weighted_edges = {}
-	local counter = 0
-	local scanlines = scanline_iter(shape)
+  local weighted_edges = {}
+  local counter = 0
+  local scanlines = scanline_iter(shape)
 
-	return function()
-		local scanline = scanlines()
-		if scanline == nil then
-			return nil
-		else
-			-- <Set> connectivity and <Table> of weighted edges with w=1 for all possible edges
-			local connectivity_set, scanline_edges = scanline_stats(scanline)
+  return function()
+    local scanline = scanlines()
+    if scanline == nil then
+      return nil
+    else
+      -- <Set> connectivity and <Table> of weighted edges with w=1 for all possible edges
+      local connectivity_set, scanline_edges = scanline_stats(scanline)
 
-			-- drop all weighted edges not fully connected to current scanline
-			for index, wgt_edge in pairs(weighted_edges) do
-				if not connectivity_set[wgt_edge.s] or not connectivity_set[wgt_edge.e] then
-					weighted_edges[index] = nil
-				end
-			end
+      -- drop all weighted edges not fully connected to current scanline
+      for index, weighted_edge in pairs(weighted_edges) do
+        if not connectivity_set[weighted_edge.s] or not connectivity_set[weighted_edge.e] then
+          weighted_edges[index] = nil
+        end
+      end
 
-			-- check each scanline_edge if it creates a rectangle with one of weighted_edges
-			-- if yes - add the weight of that edge to counter and increment weight by 1
-			-- if not - the edge is a new edge from current scanline and must be add to weighted edges for next round
-			-- if there are no weighted_edges, set all scanline_edges as the new weighted_edges for next round
-			if next(weighted_edges) ~= nil then
-				local new_weighted_edges = {}
-				for _, sl_edge in pairs(scanline_edges) do     -- TODO: convert to hash table of form "start,end" -> weight 
-					for _, wgt_edge in pairs(weighted_edges) do  -- TODO: convert to hash table
-						if sl_edge.s == wgt_edge.s and sl_edge.e == wgt_edge.e then
-							counter = counter + wgt_edge.w
-							wgt_edge.w = wgt_edge.w + 1
-							break
-						end
-					end
-					table.insert(new_weighted_edges, sl_edge)
-				end
-				for _, new_edge in pairs(new_weighted_edges) do
-					table.insert(weighted_edges, new_edge)
-				end
-			else
-				weighted_edges = scanline_edges
-			end
-			return counter, weighted_edges
-		end
-	end
+      -- check each scanline_edge if it creates a rectangle with one of weighted_edges
+      -- if yes - add the weight of that edge to counter and increment weight by 1
+      -- if not - the edge is a new edge from current scanline and must be add to weighted edges for next round
+      -- if there are no weighted_edges, set all scanline_edges as the new weighted_edges for next round
+      if next(weighted_edges) ~= nil then
+        local new_weighted_edges = {}
+        for _, scanline_edge in pairs(scanline_edges) do   -- TODO: convert to hash table of form "start,end" -> weight
+          for _, weighted_edge in pairs(weighted_edges) do -- TODO: convert to hash table
+            if scanline_edge.s == weighted_edge.s and scanline_edge.e == weighted_edge.e then
+              counter = counter + weighted_edge.w
+              weighted_edge.w = weighted_edge.w + 1
+              break
+            end
+          end
+          table.insert(new_weighted_edges, scanline_edge)
+        end
+        for _, new_edge in pairs(new_weighted_edges) do
+          table.insert(weighted_edges, new_edge)
+        end
+      else
+        weighted_edges = scanline_edges
+      end
+      return counter, weighted_edges
+    end
+  end
 end
 
 return { count = count }

@@ -5,10 +5,10 @@
 1. Install `luaunit`:
 
 ```lua
-$ luarocks install luaunit --to=./lua_modules
+$ luarocks --tree ./lua_modules install luaunit 
 ```
 
-1. Activate lua_modules with ./scripts/pathconfig.sh
+1. Activate lua_modules with ./pathconfig.sh
 
 ## Credits
 
