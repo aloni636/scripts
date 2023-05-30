@@ -2,13 +2,16 @@
 
 ## Setup
 
-1. Install `luaunit`:
+1. Locally install `luaunit` and Lua paths to there:
 
 ```lua
 $ luarocks --tree ./lua_modules install luaunit 
+$ source ./pathconfig.sh
 ```
 
-1. Activate lua_modules with ./pathconfig.sh
+## Screenshots
+
+![screenshot of ./rectangles/demo.lua](./assets/demo.gif)
 
 ## Credits
 

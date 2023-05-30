@@ -53,12 +53,18 @@ local function igmatch(s, pattern)
   end
 end
 
+---split string by lines, returning them as array
+---@param shape string
+---@return fun(): string
 local function scanline_iter(shape)
   -- make sure last char is \n
   -- this allows scanlines to be defined as all char up until \n
   if string.sub(shape, -1) ~= "\n" then
     shape = shape .. "\n"
   end
+  -- local t = {}
+  -- _ = string.gsub(shape, "(.-)\n", function(c) table.insert(t, c) end)
+  -- return t
   return string.gmatch(shape, "(.-)\n")
 end
 
@@ -150,4 +156,4 @@ local function count(shape)
   end
 end
 
-return { count = count }
+return { count = count, line_split = scanline_iter }
