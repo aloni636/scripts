@@ -1,5 +1,5 @@
-local rect = require("counter")
-local shapes = require("shapes")
+local rect = require("Rectangles.counter")
+local shapes = require("Rectangles.shapes")
 local lu = require("luaunit")
 
 --------------- TESTS ---------------

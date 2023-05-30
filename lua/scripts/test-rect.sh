@@ -1,4 +1,4 @@
 #!/bin/bash
-cd Rectangles
+cd rectangles
 lua test.lua
 cd ..

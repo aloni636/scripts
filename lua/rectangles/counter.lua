@@ -36,10 +36,9 @@
 ---        print(w) -- prints each word
 ---  			print(string.sub(w,s,e)) -- also prints each word
 ---    end
-
 ---@param s       string
 ---@param pattern string
----@return fun():number, number, string
+---@return fun(): number, number, string
 local function igmatch(s, pattern)
 	-- start, end of match
 	local st, en = 0, 0
