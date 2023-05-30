@@ -27,7 +27,8 @@
 -- If not, add it to CE
 -- Now test each iten in CE if it is connected to next scanline in s & e. If it doesnt drop it from CE.-
 
----Returns an iterator function that, each time it is called, finds the next captures from `pattern` over the string s and returns the start & end indices of capture, along with the capture text itself.
+---returns an iterator function that, each time it is called, finds the next captures from `pattern` over the string s
+---and returns the start & end indices of capture, along with the capture text itself.
 ---
 ---As an example, the following loop will iterate over all the words from string str, printing one per line:
 ---```lua
@@ -96,45 +97,55 @@ local function scanline_stats(scanline)
 	return conn, edges
 end
 
+---Returns an iterator function that, each time it is called,
+---returns the next state of the sweep line counting algorithm.
+---@param shape string
+---@return fun():  integer, table
 local function count(shape)
 	local weighted_edges = {}
 	local counter = 0
-	for scanline in scanline_iter(shape) do
-		-- <Set> connectivity and <Table> of wedges w/w=1 of all possible edges
-		local connectivity_set, scanline_edges = scanline_stats(scanline)
+	local scanlines = scanline_iter(shape)
 
-		-- drop all wedges not fully connected to current scanline
-		for index, wgt_edge in pairs(weighted_edges) do
-			if not connectivity_set[wgt_edge.s] or not connectivity_set[wgt_edge.e] then
-				weighted_edges[index] = nil
-			end
-		end
-
-		-- check each scanline_edge if it creates a rectangle with one of weighted_edges
-		-- if yes - add the weight of that edge to counter and increment weight by 1
-		-- if not - the edge is a new edge from current scanline and must be add to weighted edges for next round
-		-- if there are no weighted_edges, set all scanline_edges as the new weighted_edges for next round
-		if next(weighted_edges) ~= nil then
-			local new_weighted_edges = {}
-			for _, sl_edge in pairs(scanline_edges) do
-				for _, wgt_edge in pairs(weighted_edges) do
-					if sl_edge.s == wgt_edge.s and sl_edge.e == wgt_edge.e then
-						counter = counter + wgt_edge.w
-						wgt_edge.w = wgt_edge.w + 1
-						break
-					end
-				end
-				table.insert(new_weighted_edges, sl_edge)
-			end
-			for _, new_edge in pairs(new_weighted_edges) do
-				table.insert(weighted_edges, new_edge)
-			end
+	return function()
+		local scanline = scanlines()
+		if scanline == nil then
+			return nil
 		else
-			weighted_edges = scanline_edges
+			-- <Set> connectivity and <Table> of weighted edges with w=1 for all possible edges
+			local connectivity_set, scanline_edges = scanline_stats(scanline)
+
+			-- drop all weighted edges not fully connected to current scanline
+			for index, wgt_edge in pairs(weighted_edges) do
+				if not connectivity_set[wgt_edge.s] or not connectivity_set[wgt_edge.e] then
+					weighted_edges[index] = nil
+				end
+			end
+
+			-- check each scanline_edge if it creates a rectangle with one of weighted_edges
+			-- if yes - add the weight of that edge to counter and increment weight by 1
+			-- if not - the edge is a new edge from current scanline and must be add to weighted edges for next round
+			-- if there are no weighted_edges, set all scanline_edges as the new weighted_edges for next round
+			if next(weighted_edges) ~= nil then
+				local new_weighted_edges = {}
+				for _, sl_edge in pairs(scanline_edges) do     -- TODO: convert to hash table of form "start,end" -> weight 
+					for _, wgt_edge in pairs(weighted_edges) do  -- TODO: convert to hash table
+						if sl_edge.s == wgt_edge.s and sl_edge.e == wgt_edge.e then
+							counter = counter + wgt_edge.w
+							wgt_edge.w = wgt_edge.w + 1
+							break
+						end
+					end
+					table.insert(new_weighted_edges, sl_edge)
+				end
+				for _, new_edge in pairs(new_weighted_edges) do
+					table.insert(weighted_edges, new_edge)
+				end
+			else
+				weighted_edges = scanline_edges
+			end
+			return counter, weighted_edges
 		end
 	end
-
-	return counter
 end
 
 return { count = count }
