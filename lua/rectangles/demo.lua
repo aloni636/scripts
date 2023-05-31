@@ -7,6 +7,7 @@ local function main()
 		scanline_index = 1
 		_ = string.gsub(shape.q, "(.-)\n", function(c) table.insert(shape_vis, c) end)
 		for counter, weighted_edges in count(shape.q) do
+			-- a little bit dirty... but I don't care, so yeah...
 			if shape_vis[scanline_index]==nil then break end
 			for i = 1, scanline_index do print(shape_vis[i] .. "            ") end
 			print("count:" .. counter .. "           ")

@@ -1,5 +1,5 @@
 lu = require("luaunit")
-local List = require("List-Ops.listops").List
+local List = require("list-ops.listops").List
 
 local function predicate(item)
 	return item % 2 == 0
