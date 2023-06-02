@@ -1,7 +1,6 @@
 local count = require("rectangles.counter").count
 local shapes = require("rectangles.shapes")
 local lu = require("luaunit")
--- local dbg = require("debugger")
 
 --------------- TESTS ---------------
 
